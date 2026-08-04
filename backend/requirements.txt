@@ -2,7 +2,7 @@ fastapi==0.111.0
 uvicorn[standard]==0.29.0
 pydantic==2.7.1
 python-dotenv==1.0.1
-httpx==0.27.0
+httpx
 google-genai==2.16.0
 youtube-transcript-api==1.2.4
 google-api-python-client==2.131.0

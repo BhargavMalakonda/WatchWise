@@ -8,8 +8,6 @@
 ![Chrome Extension](https://img.shields.io/badge/Manifest-V3-orange)
 ![Gemini](https://img.shields.io/badge/Powered%20by-Gemini-4285F4)
 
-# Third-Party Services
-
 WatchWise integrates with Google Gemini API, YouTube Data API, and YouTube Transcript API. Use of these services is subject to their respective terms of service and usage limits.
 ---
 

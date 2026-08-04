@@ -411,9 +411,9 @@ B.Tech Computer Science and Engineering (AI & ML)
 
 SRM Institute of Science and Technology
 
-GitHub: https://github.com/YOUR_USERNAME
+GitHub: https://github.com/BhargavMalakonda
 
-LinkedIn: https://www.linkedin.com/in/YOUR_LINKEDIN/
+LinkedIn: https://www.linkedin.com/in/chaitanya-bhargav-malakonda/
 
 ---
 

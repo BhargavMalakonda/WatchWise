@@ -1,0 +1,17 @@
+{
+  "manifest_version": 3,
+  "name": "WatchWise",
+  "version": "0.1.0",
+  "description": "AI-powered trust score for any YouTube video.",
+  "permissions": ["activeTab", "storage"],
+  "host_permissions": ["https://*.youtube.com/*"],
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "options_page": "options.html"
+}

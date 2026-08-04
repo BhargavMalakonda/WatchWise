@@ -1,0 +1,43 @@
+# -------------------------
+# Python
+# -------------------------
+backend/venv/
+venv/
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+.eggs/
+build/
+dist/
+
+# -------------------------
+# Environment / Secrets
+# -------------------------
+backend/.env
+
+# -------------------------
+# Local database/cache
+# -------------------------
+backend/watchwise_cache.db
+
+# -------------------------
+# IDEs
+# -------------------------
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# -------------------------
+# OS files
+# -------------------------
+.DS_Store
+Thumbs.db
+
+# -------------------------
+# Logs
+# -------------------------
+*.log

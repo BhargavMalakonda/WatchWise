@@ -16,7 +16,10 @@
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
-const DEFAULT_BACKEND_URL = "http://localhost:8000";
+// Default hosted backend used by the extension.
+// Developers running WatchWise locally can change this URL from
+// Settings → Advanced → Backend URL (e.g., http://localhost:8000).
+const DEFAULT_BACKEND_URL = "https://watchwise-o786.onrender.com";
 const ANALYZE_PATH        = "/api/v1/analyze";
 
 /**

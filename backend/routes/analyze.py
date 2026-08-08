@@ -50,18 +50,19 @@ router = APIRouter()
 
 # ── Video-ID extraction ───────────────────────────────────────────────────────
 
-_SHORTS_RE = re.compile(r"/shorts/([A-Za-z0-9_-]{11})")
 _WATCH_RE = re.compile(r"/watch")
 
+# Note:
+# YouTube Shorts are intentionally not supported in V1.
+# WatchWise currently analyzes standard YouTube watch pages only.
 
 def _extract_video_id(url: str) -> Optional[str]:
     """
     Parse a YouTube URL and return the 11-character video ID, or None.
 
     Handles:
-    - https://www.youtube.com/watch?v=VIDEO_ID
-    - https://youtu.be/VIDEO_ID
-    - https://www.youtube.com/shorts/VIDEO_ID
+   - https://www.youtube.com/watch?v=VIDEO_ID
+   - https://youtu.be/VIDEO_ID
     """
     parsed = urlparse(url)
 
@@ -69,11 +70,6 @@ def _extract_video_id(url: str) -> Optional[str]:
     if parsed.netloc == "youtu.be":
         vid = parsed.path.lstrip("/")
         return vid if len(vid) == 11 else None
-
-    # /shorts/<id>
-    shorts_match = _SHORTS_RE.search(parsed.path)
-    if shorts_match:
-        return shorts_match.group(1)
 
     # /watch?v=<id>
     if _WATCH_RE.search(parsed.path):
@@ -99,9 +95,9 @@ async def analyze_video(request: Request, body: AnalyzeRequest) -> AnalyzeRespon
             status_code=422,
             detail=(
                 "Could not extract a YouTube video ID from the provided URL. "
-                "Expected a URL in the form https://www.youtube.com/watch?v=VIDEO_ID, "
-                "https://youtu.be/VIDEO_ID, or https://www.youtube.com/shorts/VIDEO_ID."
-            ),
+                "Expected a URL in the form https://www.youtube.com/watch?v=VIDEO_ID "
+                "or https://youtu.be/VIDEO_ID."
+            )
         )
 
     # ── 2. Cache check (quota-free) ───────────────────────────────────────────

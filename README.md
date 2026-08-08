@@ -22,7 +22,7 @@ Instead of relying solely on likes or view counts, WatchWise evaluates multiple 
 
 # Features
 
-- AI-powered analysis of educational YouTube videos
+- AI-assisted analysis of educational YouTube videos
 - Watch Score (0–100)
 - Educational Value Score
 - Community Trust Score
@@ -38,7 +38,6 @@ Instead of relying solely on likes or view counts, WatchWise evaluates multiple 
 - Prompt Injection Protection
 - HTML Sanitization
 - Rate Limiting
-- Hosted and self-hostable backend
 
 ---
 
@@ -62,26 +61,27 @@ Instead of relying solely on likes or view counts, WatchWise evaluates multiple 
                  │          ▼                     ▼
                  │   YouTube Data API   YouTube Transcript API
                  │          │                     │
-                 │          ▼                     │
+                 │          ▼                     ▼
                  │          └─Category Pre-Filter─┘
                  │                     │
+                 │                     ▼
                  │                Educational?
                  │
-                 │              No ──► Return Early
-                 │
-                 │                    Yes
-                 │                     │
-                 │                     ▼
-                 │             Gemini AI Analysis
-                 │                     │
-                 │                     ▼
-                 │            Store Result in Cache
-                 │                     │
-                 └─────────────────────┘
+                 │               │         │
+                 │               │ No      │ Yes
+                 │               ▼         │
+                 │          Return Early   │
+                 │                         │
+                 │                         ▼
+                 │                  Gemini AI Analysis
+                 │                         │
+                 │                         ▼
+                 │                  Store Result in Cache
+                 │                         │
+                 └─────────────────────────┘
                                        ▼
                               Recommendation Response
 ```
-
 ---
 
 # Tech Stack
@@ -158,7 +158,7 @@ You'll run the FastAPI backend locally and connect the Chrome extension to it.
 ## Step 1: Clone the Repository
 
 ```bash
-git clone https://github.com/BhargavMalakonda/WatchWise
+git clone https://github.com/BhargavMalakonda/WatchWise.git
 cd WatchWise
 ```
 
@@ -287,7 +287,7 @@ Backend URL
 http://localhost:8000
 ```
 
-5. Save the settings.
+7. Save the settings.
 
 WatchWise will now communicate with your local FastAPI backend.
 
@@ -296,7 +296,7 @@ WatchWise will now communicate with your local FastAPI backend.
 
 # Screenshots
 
-## Extension Popup
+## Side Panel
 
 <img width="1917" height="963" alt="image" src="https://github.com/user-attachments/assets/5062b0ee-8bf4-4eeb-8045-472d02011420" />
 
@@ -418,6 +418,8 @@ This project is licensed under the MIT License.
 # Author
 
 **Malakonda Chaitanya Bhargav**
+
+Reliance Foundation Undergraduate Scholar
 
 B.Tech Computer Science and Engineering (AI & ML)
 

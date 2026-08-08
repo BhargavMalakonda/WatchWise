@@ -7,9 +7,7 @@ from dataclasses import dataclass
 NON_EDUCATIONAL = {
     "10": "Music",
     "17": "Sports",
-    "20": "Gaming",
     "23": "Comedy",
-    "24": "Entertainment",
 }
 
 

@@ -336,9 +336,7 @@ The extension will now communicate with your locally hosted backend instead of t
 
 A short demonstration video of WatchWise is available here:
 
-```
-<https://www.youtube.com/watch?v=ClEz21Rn6sA>
-```
+https://www.youtube.com/watch?v=ClEz21Rn6sA
 
 ---
 

@@ -1,0 +1,10 @@
+fastapi
+uvicorn[standard]==0.29.0
+pydantic
+python-dotenv==1.0.1
+httpx
+google-genai==2.16.0
+youtube-transcript-api==1.2.4
+google-api-python-client==2.131.0
+slowapi==0.1.9
+bleach==6.1.0

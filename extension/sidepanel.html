@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WatchWise</title>
+
+  <style>
+    .header-actions{
+    display:flex;
+    align-items:center;
+    gap:8px;
+}
+#refresh-btn{
+    border:none;
+    border-radius:5px;
+    padding:6px 10px;
+    font-size:12px;
+    margin-left: 2px;
+    margin-top:2px;
+    cursor:pointer;
+    background:#2563eb;
+    color:white;
+}
+#refresh-btn:disabled{
+    opacity:.45;
+    cursor:not-allowed;
+}
+  </style>
+  <div class="header-actions">
+    <button id="refresh-btn" disabled>
+        Current Video
+    </button>
+</div>
+
+  <style>
+    /* ── Reset & base ──────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-size: 13px;
+      color: #1a1a1a;
+      background: #f5f5f5;
+      width: 360px;
+      min-height: 120px;
+    }
+
+    /* ── Header ────────────────────────────────────────────────────── */
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 14px 10px;
+      border-bottom: 1px solid #e8e8e8;
+      background: #fff;
+    }
+    .header-logo {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 15px;
+      font-weight: 700;
+      color: #c00;
+      letter-spacing: -0.3px;
+    }
+    .header-logo-icon {
+      width: 20px;
+      height: 20px;
+      fill: #c00;
+    }
+    .settings-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 4px;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      color: #666;
+      transition: background 0.15s, color 0.15s;
+    }
+    .settings-btn:hover { background: #f0f0f0; color: #333; }
+    .settings-btn svg { width: 16px; height: 16px; fill: currentColor; }
+
+    /* ── States: loading / error / not-youtube ─────────────────────── */
+    .state-panel {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 28px 20px;
+      text-align: center;
+      color: #555;
+      background: #fff;
+    }
+    .state-panel .state-icon {
+      font-size: 28px;
+      line-height: 1;
+    }
+    .state-panel .state-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #333;
+    }
+    .state-panel .state-msg {
+      font-size: 12px;
+      color: #777;
+      line-height: 1.5;
+    }
+
+    /* Spinner */
+    .spinner {
+      width: 28px;
+      height: 28px;
+      border: 3px solid #e0e0e0;
+      border-top-color: #c00;
+      border-radius: 50%;
+      animation: spin 0.75s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Stage message cycling */
+    .loading-stage {
+      font-size: 13px;
+      font-weight: 600;
+      color: #333;
+    }
+    .loading-sub {
+      font-size: 11px;
+      color: #aaa;
+    }
+    .stage-dots::after {
+      content: "";
+      animation: dots 1.2s steps(4, end) infinite;
+    }
+    @keyframes dots {
+      0%   { content: ""; }
+      25%  { content: "."; }
+      50%  { content: ".."; }
+      75%  { content: "..."; }
+      100% { content: ""; }
+    }
+
+    /* ── Results panel ─────────────────────────────────────────────── */
+    #results {
+      display: none;
+      padding: 10px;
+      flex-direction: column;
+      gap: 10px;
+    }
+    #results[style*="block"] {
+      display: flex !important;
+    }
+
+    /* Card containers */
+    .card {
+      background: #fff;
+      border: 1px solid #e8e8e8;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .card-padded {
+      padding: 12px 14px;
+    }
+
+    .section-title {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #888;
+      margin-bottom: 8px;
+    }
+    .section-subtitle {
+      font-size: 11px;
+      color: #777;
+      line-height: 1.45;
+      margin-bottom: 10px;
+    }
+
+    /* Score hero */
+    .score-hero {
+      padding: 16px 14px 14px;
+      text-align: center;
+    }
+    .score-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: #888;
+      margin-bottom: 4px;
+    }
+    .score-value {
+      font-size: 52px;
+      font-weight: 800;
+      line-height: 1;
+      margin-bottom: 10px;
+    }
+    .score-bar-track {
+      height: 6px;
+      background: #eee;
+      border-radius: 3px;
+      margin: 0 auto 12px;
+      max-width: 200px;
+    }
+    .score-bar-fill {
+      height: 100%;
+      border-radius: 3px;
+      transition: width 0.4s ease;
+    }
+    .hero-meta {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+    .rec-badge {
+      display: inline-block;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.2px;
+    }
+    .rec-highly-recommended { background: #dcfce7; color: #16a34a; }
+    .rec-recommended        { background: #e0f2fe; color: #0369a1; }
+    .rec-watch-with-caution { background: #fef3c7; color: #b45309; }
+    .rec-not-recommended    { background: #fee2e2; color: #dc2626; }
+
+    .assessment-block {
+      text-align: center;
+      padding-top: 4px;
+      border-top: 1px solid #f0f0f0;
+      margin-top: 4px;
+      width: 100%;
+    }
+    .assessment-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: #333;
+      line-height: 1.4;
+    }
+    .assessment-confidence {
+      font-size: 11px;
+      color: #888;
+      margin-top: 2px;
+    }
+
+    /* Score breakdown grid */
+    .breakdown {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    .breakdown-cell {
+      background: #fafafa;
+      border: 1px solid #f0f0f0;
+      border-radius: 8px;
+      padding: 10px 10px 8px;
+    }
+    .breakdown-cell .bc-label {
+      font-size: 10px;
+      color: #888;
+      font-weight: 600;
+      letter-spacing: 0.2px;
+      margin-bottom: 3px;
+      line-height: 1.3;
+    }
+    .breakdown-cell .bc-value {
+      font-size: 20px;
+      font-weight: 700;
+    }
+    .breakdown-cell .bc-bar {
+      height: 3px;
+      border-radius: 2px;
+      margin-top: 5px;
+      background: #eee;
+    }
+    .breakdown-cell .bc-bar-fill {
+      height: 100%;
+      border-radius: 2px;
+      transition: width 0.4s ease;
+    }
+
+    /* Pros / Cons */
+    .pros-cons {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    .pros-block, .cons-block {
+      background: #fafafa;
+      border: 1px solid #f0f0f0;
+      border-radius: 8px;
+      padding: 10px;
+    }
+    .pros-block .section-title { color: #16a34a; margin-bottom: 6px; }
+    .cons-block .section-title { color: #dc2626; margin-bottom: 6px; }
+    .bullet-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+    .bullet-list li {
+      font-size: 11px;
+      color: #444;
+      line-height: 1.45;
+      padding-left: 12px;
+      position: relative;
+    }
+    .bullet-list li::before {
+      content: "•";
+      position: absolute;
+      left: 0;
+      color: #bbb;
+    }
+    .pros-block .bullet-list li::before { color: #16a34a; }
+    .cons-block .bullet-list li::before { color: #dc2626; }
+
+    /* Summary */
+    .summary-text {
+      font-size: 12px;
+      color: #444;
+      line-height: 1.6;
+    }
+
+    /* Pills & chips */
+    .pill-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 8px;
+    }
+    .signal-pill, .level-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 10px;
+      font-weight: 600;
+      padding: 4px 8px;
+      border-radius: 12px;
+      border: 1px solid transparent;
+    }
+    .pill-label {
+      color: #666;
+      font-weight: 500;
+    }
+    .pill-low    { background: #dcfce7; color: #16a34a; border-color: #bbf7d0; }
+    .pill-medium { background: #fef3c7; color: #b45309; border-color: #fde68a; }
+    .pill-high   { background: #fee2e2; color: #dc2626; border-color: #fecaca; }
+
+    .risk-pill {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: capitalize;
+      letter-spacing: 0.2px;
+      padding: 3px 8px;
+      border-radius: 10px;
+    }
+    .risk-low    { background: #dcfce7; color: #16a34a; }
+    .risk-medium { background: #fef3c7; color: #b45309; }
+    .risk-high   { background: #fee2e2; color: #dc2626; }
+    .risk-confidence {
+      font-size: 10px;
+      color: #aaa;
+    }
+
+    .status-chip {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 10px;
+      text-transform: capitalize;
+      flex-shrink: 0;
+    }
+    .status-pass    { background: #dcfce7; color: #16a34a; }
+    .status-warning { background: #fef3c7; color: #b45309; }
+    .status-fail    { background: #fee2e2; color: #dc2626; }
+
+    /* Claim cards */
+    .claim-card {
+      background: #fafafa;
+      border: 1px solid #eee;
+      border-radius: 8px;
+      padding: 10px;
+      margin-bottom: 8px;
+    }
+    .claim-card:last-child { margin-bottom: 0; }
+    .claim-text {
+      font-size: 12px;
+      font-weight: 600;
+      color: #222;
+      line-height: 1.45;
+      margin-bottom: 6px;
+    }
+    .claim-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      margin-bottom: 6px;
+    }
+    .claim-tag {
+      font-size: 9px;
+      font-weight: 600;
+      padding: 2px 6px;
+      border-radius: 8px;
+      background: #f0f0f0;
+      color: #555;
+      text-transform: capitalize;
+    }
+    .verify-supported              { background: #dcfce7; color: #16a34a; }
+    .verify-needs-context          { background: #fef3c7; color: #b45309; }
+    .verify-needs-verification     { background: #fee2e2; color: #dc2626; }
+    .verify-insufficient-information { background: #f3f4f6; color: #6b7280; }
+    .verify-status-note {
+      font-size: 11px;
+      color: #555;
+      margin-bottom: 6px;
+      line-height: 1.4;
+    }
+    .claim-questions {
+      list-style: none;
+      margin-bottom: 6px;
+    }
+    .claim-questions li {
+      font-size: 11px;
+      color: #555;
+      line-height: 1.4;
+      padding-left: 12px;
+      position: relative;
+      margin-bottom: 3px;
+    }
+    .claim-questions li::before {
+      content: "?";
+      position: absolute;
+      left: 0;
+      color: #f59e0b;
+      font-weight: 700;
+      font-size: 10px;
+    }
+    .claim-skill {
+      font-size: 10px;
+      color: #888;
+      font-style: italic;
+    }
+
+    /* Before you share rows */
+    .share-row {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 8px 0;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    .share-row:last-child { border-bottom: none; padding-bottom: 0; }
+    .share-question {
+      font-size: 12px;
+      color: #333;
+      line-height: 1.45;
+      flex: 1;
+    }
+
+    /* MIL learning cards */
+    .mil-card {
+      background: #fafafa;
+      border: 1px solid #eee;
+      border-radius: 8px;
+      padding: 10px;
+      margin-bottom: 8px;
+    }
+    .mil-card:last-child { margin-bottom: 0; }
+    .mil-skill {
+      font-size: 11px;
+      font-weight: 700;
+      color: #333;
+      margin-bottom: 4px;
+    }
+    .mil-lesson {
+      font-size: 11px;
+      color: #444;
+      line-height: 1.45;
+      margin-bottom: 4px;
+    }
+    .mil-why {
+      font-size: 10px;
+      color: #666;
+      line-height: 1.4;
+      margin-bottom: 4px;
+    }
+    .mil-question {
+      font-size: 10px;
+      color: #888;
+      font-style: italic;
+    }
+
+    /* Collapsible sections */
+    .evidence-section {
+      border: none;
+    }
+    .evidence-toggle {
+      width: 100%;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 12px;
+      font-weight: 600;
+      color: #333;
+      text-align: left;
+      transition: background 0.15s;
+    }
+    .evidence-toggle:hover { background: #f5f5f5; }
+    .evidence-toggle:focus-visible {
+      outline: 2px solid #2563eb;
+      outline-offset: -2px;
+    }
+    .evidence-toggle .toggle-arrow {
+      font-size: 10px;
+      color: #888;
+      transition: transform 0.2s;
+      flex-shrink: 0;
+      margin-left: 8px;
+    }
+    .evidence-toggle.open .toggle-arrow { transform: rotate(180deg); }
+    .evidence-list {
+      display: none;
+      padding: 0 14px 12px;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .evidence-list.open { display: flex; }
+    .evidence-item {
+      font-size: 11px;
+      color: #555;
+      line-height: 1.45;
+      padding: 8px 10px;
+      background: #fafafa;
+      border-left: 3px solid #ddd;
+      border-radius: 0 6px 6px 0;
+    }
+    .section-header-inline {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      flex: 1;
+    }
+    .section-risk-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 0 14px 10px;
+    }
+
+    /* Footer */
+    .footer {
+      padding: 6px 4px 2px;
+      font-size: 10px;
+      color: rgb(203, 23, 23);
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ── Header ── -->
+  <header class="header">
+    <div class="header-logo">
+      <svg class="header-logo-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zm0 12.5a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0-8a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"/>
+      </svg>
+      WatchWise
+    </div>
+    <button class="settings-btn" id="settings-btn" title="Settings" aria-label="Open settings">
+      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path d="M19.14 12.94a7.07 7.07 0 0 0 .06-.94 7.07 7.07 0 0 0-.06-.94l2.03-1.58a.5.5 0 0 0 .12-.63l-1.92-3.32a.5.5 0 0 0-.61-.22l-2.39.96a7.02 7.02 0 0 0-1.62-.94l-.36-2.54A.484.484 0 0 0 14 3h-4a.484.484 0 0 0-.48.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96a.488.488 0 0 0-.61.22L2.62 9.47a.48.48 0 0 0 .12.63l2.03 1.58A7.2 7.2 0 0 0 4.7 12c0 .31.03.63.07.94l-2.03 1.58a.5.5 0 0 0-.12.63l1.92 3.32c.12.22.37.3.61.22l2.39-.96c.49.37 1.03.7 1.62.94l.36 2.54c.06.28.31.47.59.47h4c.28 0 .52-.19.59-.47l.36-2.54c.59-.24 1.13-.57 1.62-.94l2.39.96c.24.09.49 0 .61-.22l1.92-3.32a.48.48 0 0 0-.12-.63l-2.03-1.58zM12 15.5A3.5 3.5 0 1 1 12 8.5a3.5 3.5 0 0 1 0 7z"/>
+      </svg>
+    </button>
+  </header>
+
+  <style>
+    #refresh-banner{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:10px 14px;
+    background:#fff8e1;
+    border-bottom:1px solid #ffe082;
+}
+.refresh-text{
+    font-size:12px;
+    color:#444;
+    font-weight:500;
+}
+#refresh-btn{
+    padding:6px 12px;
+    border:none;
+    border-radius:6px;
+    background:#c00;
+    color:white;
+    cursor:pointer;
+    font-size:12px;
+}
+.score-formula {
+  font-size: 10px;
+  color: #999;
+  margin-top: 4px;
+}
+  </style>
+  <div id="refresh-banner" style="display:none;">
+    <div class="refresh-text">
+        New YouTube video detected.
+    </div>
+    <button id="refresh-btn">
+        Analyze New Video
+    </button>
+</div>
+
+  <!-- ── Loading state ── -->
+  <div id="state-loading" class="state-panel">
+    <div class="spinner" role="status" aria-label="Analysing video"></div>
+    <span class="loading-stage" id="loading-stage" aria-live="polite" aria-atomic="true">
+      Reading video information<span class="stage-dots" aria-hidden="true"></span>
+    </span>
+    <span class="loading-sub">This may take a few seconds</span>
+  </div>
+
+  <!-- ── Error state ── -->
+  <div id="state-error" class="state-panel" style="display:none;">
+    <span class="state-icon" aria-hidden="true">⚠️</span>
+    <span class="state-title" id="error-title">Something went wrong</span>
+    <span class="state-msg" id="error-msg"></span>
+  </div>
+
+  <!-- ── Not-a-YouTube-video state ── -->
+  <div id="state-not-youtube" class="state-panel" style="display:none;">
+    <span class="state-icon" aria-hidden="true">📺</span>
+    <span class="state-title">Not a YouTube video</span>
+    <span class="state-msg">Navigate to a YouTube watch page and reopen WatchWise.</span>
+  </div>
+
+  <!-- ── Results ── -->
+  <main id="results" role="main">
+
+<!-- 1. Trust & Learning Score hero -->
+    <section class="card score-hero" aria-label="Trust and learning score">
+      <div class="score-label">MEDIA Literacy Review</div>
+      <div class="score-value" id="watch-score" aria-live="polite">—</div>
+      <div class="score-bar-track" role="progressbar" aria-labelledby="watch-score" aria-valuemin="0" aria-valuemax="100">
+        <div class="score-bar-fill" id="score-bar" style="width:0%"></div>
+      </div>
+      <div class="hero-meta">
+        <div id="rec-badge" class="rec-badge" aria-label="Recommendation"></div>
+        <div class="assessment-block" id="assessment-block">
+          <div class="assessment-label" id="assessment-label"></div>
+          <div class="assessment-confidence" id="assessment-confidence" aria-label="Assessment confidence"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. Score breakdown -->
+    <section class="card card-padded" aria-label="Score breakdown">
+      <div class="section-title">Score Breakdown</div>
+      <div class="breakdown">
+        <div class="breakdown-cell">
+          <div class="bc-label">Learning Value</div>
+          <div class="bc-value" id="bd-educational">—</div>
+          <div class="bc-bar"><div class="bc-bar-fill" id="bar-educational" style="width:0%"></div></div>
+        </div>
+        <div class="breakdown-cell">
+          <div class="bc-label">Community Perspective</div>
+          <div class="bc-value" id="bd-community">—</div>
+          <div class="bc-bar"><div class="bc-bar-fill" id="bar-community" style="width:0%"></div></div>
+        </div>
+        <div class="breakdown-cell">
+          <div class="bc-label">Easy to Understand</div>
+          <div class="bc-value" id="bd-clarity">—</div>
+          <div class="bc-bar"><div class="bc-bar-fill" id="bar-clarity" style="width:0%"></div></div>
+        </div>
+        <div class="breakdown-cell">
+          <div class="bc-label">Beginner Friendly</div>
+          <div class="bc-value" id="bd-beginner">—</div>
+          <div class="bc-bar"><div class="bc-bar-fill" id="bar-beginner" style="width:0%"></div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. Pros / Cons -->
+    <section class="card card-padded" aria-label="Pros and cons">
+      <div class="pros-cons">
+        <div class="pros-block">
+          <div class="section-title">Pros</div>
+          <ul class="bullet-list" id="pros-list" aria-label="Pros"></ul>
+        </div>
+        <div class="cons-block">
+          <div class="section-title">Cons</div>
+          <ul class="bullet-list" id="cons-list" aria-label="Cons"></ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. Summary -->
+    <section class="card card-padded" aria-label="Summary">
+      <div class="section-title">Summary</div>
+      <p class="summary-text" id="summary-text"></p>
+    </section>
+
+    <!-- 5. Top Claims -->
+    <section class="card card-padded" id="claims-section" aria-label="Top claims" style="display:none;">
+      <div class="section-title">Top Claims</div>
+      <p class="section-subtitle">Key claims worth thinking about before believing or sharing.</p>
+      <div id="claims-list"></div>
+      <div class="evidence-section" id="claims-more-section" style="display:none;">
+        <button class="evidence-toggle" id="claims-more-toggle" aria-expanded="false">
+          <span id="claims-more-label">Show more claims</span>
+          <span class="toggle-arrow" aria-hidden="true">▼</span>
+        </button>
+        <div class="evidence-list" id="claims-more-list"></div>
+      </div>
+    </section>
+
+    <!-- 6. Before You Share -->
+    <section class="card card-padded" id="before-share-section" aria-label="Before you share" style="display:none;">
+      <div class="section-title">Before You Share</div>
+      <p class="section-subtitle">Quick checks to run before passing this video along.</p>
+      <div id="before-share-list"></div>
+    </section>
+
+    <!-- 8. Information Signals -->
+    <section class="card card-padded" id="info-signals-section" aria-label="Information signals" style="display:none;">
+      <div class="section-title">Information Signals</div>
+      <div class="pill-row" id="info-signals-pills"></div>
+    </section>
+
+    <!-- 7. What Viewers Are Saying -->
+    <section class="card" id="viewers-section" aria-label="What viewers are saying" style="display:none;">
+      <div class="card-padded" style="padding-bottom:8px;">
+        <div class="section-title">What Viewers Are Saying</div>
+        <div class="pill-row" id="community-pills" aria-label="Viewer agreement and disagreement"></div>
+        <ul class="bullet-list" id="community-notes" aria-label="Community notes"></ul>
+      </div>
+      <div class="evidence-section" id="community-evidence-section" style="display:none;">
+        <button class="evidence-toggle" id="community-evidence-toggle" aria-expanded="false">
+          <span>Viewer comments</span>
+          <span class="toggle-arrow" aria-hidden="true">▼</span>
+        </button>
+        <div class="evidence-list" id="community-evidence-list" role="list"></div>
+      </div>
+    </section>
+
+    <!-- 9. Inclusion Signals -->
+    <section class="card card-padded" id="inclusion-signals-section" aria-label="Inclusion signals" style="display:none;">
+      <div class="section-title">Accessibility &amp; Learning</div>
+      <div class="pill-row" id="inclusion-signals-pills"></div>
+    </section>
+
+    <!-- Information Age Check -->
+    <section class="card evidence-section" id="outdated-evidence-section" aria-label="Information age check" style="display:none;">
+      <button class="evidence-toggle" id="outdated-evidence-toggle" aria-expanded="false">
+        <span class="section-header-inline">
+          <span>Information Age Check</span>
+        </span>
+        <span class="toggle-arrow" aria-hidden="true">▼</span>
+      </button>
+      <div class="section-risk-row">
+        <span class="risk-pill" id="outdated-pill">—</span>
+        <span class="risk-confidence" id="outdated-conf" aria-label="Confidence"></span>
+      </div>
+      <div class="evidence-list" id="outdated-evidence-list" role="list"></div>
+    </section>
+
+    <!-- Claims Worth Double-Checking -->
+    <section class="card evidence-section" id="misinfo-evidence-section" aria-label="Claims worth double-checking" style="display:none;">
+      <button class="evidence-toggle" id="misinfo-evidence-toggle" aria-expanded="false">
+        <span class="section-header-inline">
+          <span>Claims Worth Double-Checking</span>
+        </span>
+        <span class="toggle-arrow" aria-hidden="true">▼</span>
+      </button>
+      <div class="section-risk-row">
+        <span class="risk-pill" id="misinfo-pill">—</span>
+      </div>
+      <div class="evidence-list" id="misinfo-evidence-list" role="list"></div>
+    </section>
+
+    <!-- 10. Learn More -->
+    <section class="card evidence-section" id="learn-more-section" aria-label="Learn more" style="display:none;">
+      <button class="evidence-toggle" id="learn-more-toggle" aria-expanded="false">
+        <span>Learn More</span>
+        <span class="toggle-arrow" aria-hidden="true">▼</span>
+      </button>
+      <div class="evidence-list" id="learn-more-content"></div>
+    </section>
+
+    <footer class="footer">
+      <span id="footer-note">WatchWise v0.1</span>
+    </footer>
+
+  </main>
+
+  <script src="sidepanel.js"></script>
+</body>
+</html>

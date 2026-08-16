@@ -447,7 +447,8 @@ LinkedIn: <https://www.linkedin.com/in/chaitanya-bhargav-malakonda/>
 - Proposal Development
 - Testing & User Experience
 
-LinkedIn: <her-linkedin>
+GitHub: https://github.com/lekhanareddykata-blip
+LinkedIn: <https://www.linkedin.com/in/lekhana-kata-b2b284323/>
 
 ---
 

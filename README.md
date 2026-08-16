@@ -1,6 +1,6 @@
 # WatchWise
 
-> AI-powered Chrome Extension that analyzes YouTube videos using community feedback, transcripts, and Gemini to help you decide whether a video is worth your time.
+> WatchWise is a Media and Information Literacy (MIL) browser extension that helps young people critically evaluate what they learn from YouTube before believing, sharing, or acting on it.
 
 ![License](https://img.shields.io/badge/license-MIT-blue)
 ![Python](https://img.shields.io/badge/Python-3.11+-3776AB)
@@ -12,40 +12,63 @@
 
 # Overview
 
-Every day, students and developers spend hours on YouTube tutorials that turn out to be outdated, misleading, or simply low quality.
+Millions of young people use YouTube as a primary source of learning for technology, finance, science, and career development.
 
-WatchWise helps users decide whether a video is worth watching by combining transcript analysis, community feedback, and AI reasoning into a single recommendation.
+However, views, likes, and watch time do not help users evaluate whether information is accurate, complete, well-supported, or presented with sufficient context.
 
-Instead of relying solely on likes or view counts, WatchWise evaluates multiple quality signals to generate a structured report that includes educational value, community trust, outdated content risk, misinformation risk, AI-generated summaries, and actionable recommendations.
+WatchWise is a Media and Information Literacy (MIL) browser extension that transforms everyday YouTube viewing into an opportunity for critical evaluation.
 
+Instead of telling users what to think, WatchWise helps them ask the questions a critical thinker would:
+
+- What claims is this video making?
+- What evidence supports those claims?
+- Could important context be missing?
+- Is this statement fact, opinion, or interpretation?
+- Should this information be verified before sharing?
+
+By embedding these questions directly into the viewing experience, WatchWise helps users develop transferable media-literacy habits while consuming real-world content.
+
+> Developed for the UNESCO Youth Hackathon 2026 under the theme:
+> "Play Your Part: Youth Designing the Future of Media and Information Literacy."
 ---
 
 # Features
 
-- AI-assisted analysis of educational YouTube videos
-- Watch Score (0–100)
-- Educational Value Score
-- Community Trust Score
-- Outdated Content Detection
-- Misinformation Risk Analysis
-- Lightweight YouTube category pre-filter to reduce unnecessary AI calls
-- AI-generated Summary
-- Recommendation with Pros & Cons
-- Community Evidence extracted from comments
-- SQLite-backed response caching for faster repeated analyses
-- Persistent Chrome Side Panel experience
-- One-click "Analyze New Video" workflow
-- Prompt Injection Protection
-- HTML Sanitization
-- Rate Limiting
+- Key Claim Identification
+- Verification Status (Supported / Needs Context / Needs Verification)
+- Media Literacy Skill Mapping
+- Critical Thinking Prompts
+- Before You Share Checklist
+- Community Perspective Analysis
+- Outdated Information Detection
+- Evidence Evaluation
+- AI-generated Educational Summary
+- Opinion vs Fact Analysis
+
+---
+
+# UNESCO Media & Information Literacy Alignment
+
+WatchWise was designed around practical Media and Information Literacy competencies.
+
+| WatchWise Feature | MIL Skill |
+|-------------------|-----------|
+| Top Claims | Evidence Verification |
+| Verification Status | Source Evaluation |
+| Critical Thinking Prompts | Context Awareness |
+| Opinion vs Fact Analysis | Distinguishing Fact from Opinion |
+| Community Perspective | Bias Recognition |
+| Outdated Information Detection | Recency Checking |
+| Before You Share Checklist | Responsible Information Sharing |
+
+Rather than teaching MIL through standalone lessons, WatchWise embeds literacy skills directly into everyday online behavior.
 
 ---
 
 # Architecture
 
 ```text
-
-                     Chrome Extension
+                    Chrome Extension
                             │
                             ▼
                      FastAPI Backend
@@ -61,27 +84,18 @@ Instead of relying solely on likes or view counts, WatchWise evaluates multiple 
                  │          ▼                     ▼
                  │   YouTube Data API   YouTube Transcript API
                  │          │                     │
-                 │          ▼                     ▼
-                 │          └─Category Pre-Filter─┘
+                 │          └──────────┬──────────┘
+                 │                     ▼
+                 │             Gemini AI Analysis
                  │                     │
                  │                     ▼
-                 │                Educational?
-                 │
-                 │               │         │
-                 │               │ No      │ Yes
-                 │               ▼         │
-                 │          Return Early   │
-                 │                         │
-                 │                         ▼
-                 │                  Gemini AI Analysis
-                 │                         │
-                 │                         ▼
-                 │                  Store Result in Cache
-                 │                         │
-                 └─────────────────────────┘
-                                       ▼
-                              Recommendation Response
+                 │          Store Result in Cache
+                 │                     │
+                 └──────────────┬──────┘
+                                ▼
+                    Recommendation Response
 ```
+
 ---
 
 # Tech Stack
@@ -125,37 +139,34 @@ WatchWise/
 │   ├── routes/
 │   ├── services/
 │   ├── tests/
-│   ├── scripts/
 │   ├── main.py
 │   └── requirements.txt
+│   
 │
 ├── extension/
 │   ├── manifest.json
-│   ├── background.js
 │   ├── popup.html
 │   ├── popup.js
-│   ├── sidepanel.html
-│   ├── sidepanel.js
 │   ├── options.html
 │   ├── options.js
 │   └── icons/
 │
-├── setup.sh
-├── setup.bat
-└── README.md
+└──screenshots/
+   ├── dashboard.png
+   ├── top-claims.png
+   ├── mil-skills.png
+   └── before-share.png
 ```
 
 ---
 
 # Installation
 
-WatchWise runs entirely on your local machine.
+## Using the Hosted Backend (Recommended)
 
-You'll run the FastAPI backend locally and connect the Chrome extension to it.
+WatchWise is designed to work out of the box using the hosted backend. No Python installation or backend setup is required.
 
----
-
-## Step 1: Clone the Repository
+### Step 1: Clone the repository
 
 ```bash
 git clone https://github.com/BhargavMalakonda/WatchWise.git
@@ -166,151 +177,158 @@ Alternatively, download the repository as a ZIP and extract it.
 
 ---
 
-## Step 2: Install Dependencies
+### Step 2: Load the Chrome Extension
+
+1. Open Google Chrome.
+2. Navigate to:
+
+```
+chrome://extensions
+```
+
+3. Enable **Developer Mode** (top-right corner).
+4. Click **Load unpacked**.
+5. Select the `extension/` folder from this repository.
+
+The extension is now installed and ready to use.
+
+By default, it connects to the hosted WatchWise backend automatically.
+
+---
+
+## Bring Your Own Gemini API Key (Optional)
+
+WatchWise works without a personal Gemini API key by using the hosted backend's shared daily quota.
+
+If the shared quota has been exhausted, or if you prefer to use your own Gemini API key:
+
+1. Open the extension.
+2. Click the **Settings** icon.
+3. Select **My Gemini API Key**.
+4. Generate a free API key from:
+
+```
+https://aistudio.google.com/apikey
+```
+
+5. Paste your API key and save.
+
+Your API key:
+
+- is stored only in your browser using `chrome.storage.local`
+- is never logged
+- is never stored on the server
+- is used only for the current analysis request
+
+---
+
+# Self-Hosting (Optional)
+
+Developers who want to run their own backend or contribute to WatchWise can self-host the FastAPI server.
+
+## Backend Setup
+
+Navigate to the backend directory.
+
+```bash
+cd backend
+```
+
+Create a virtual environment.
 
 ### Windows
 
-Run:
-
 ```bash
-setup.bat
+python -m venv venv
+venv\Scripts\activate
 ```
 
 ### macOS / Linux
 
-Run:
+```bash
+python3 -m venv venv
+source venv/bin/activate
+```
+
+Install the required dependencies.
 
 ```bash
-chmod +x setup.sh
-./setup.sh
+pip install -r requirements.txt
 ```
 
-The setup script automatically:
-
-- Creates a Python virtual environment
-- Installs all required dependencies
-- Generates a starter `.env` file (if missing)
-
----
-
-## Step 3: Configure API Keys
-
-Open the generated `.env` file inside the `backend/` directory and add your API keys before starting the backend.
-
-### Required API Keys
-
-#### YouTube Data API v3
-
-Get an API key from:
-
-```text
-https://console.cloud.google.com/
-```
-
-#### Google Gemini API
-
-Get a free API key from:
-
-```text
-https://aistudio.google.com/apikey
-```
-
-Example:
+Create a `.env` file inside the `backend/` directory.
 
 ```env
 YOUTUBE_API_KEY=YOUR_YOUTUBE_API_KEY
 GEMINI_API_KEY=YOUR_GEMINI_API_KEY
+DEFAULT_DAILY_QUOTA=100
 ```
+### Getting the required API Keys
 
----
+#### YouTube Data API Key
 
-## Step 4: Start the Backend
+Visit the **Google Cloud Console**:
 
-### Windows
+   https://console.cloud.google.com/
+
+#### Gemini API Key
+
+Visit **Google AI Studio**:
+
+   https://aistudio.google.com/apikey
+
+Start the backend.
 
 ```bash
-cd backend
-venv\Scripts\activate
-uvicorn main:app --reload
-```
-
-### macOS / Linux
-
-```bash
-cd backend
-source venv/bin/activate
 uvicorn main:app --reload
 ```
 
 The backend will be available at:
 
-```text
+```
 http://localhost:8000
 ```
 
-Interactive API documentation:
+Interactive API documentation is available at:
 
-```text
+```
 http://localhost:8000/docs
 ```
 
 ---
 
-## Step 5: Load the Chrome Extension
+## Using a Local Backend
 
-1. Open Google Chrome.
-2. Navigate to:
+If you are running your own backend:
 
-```text
-chrome://extensions
+1. Open the extension.
+2. Click **Settings**.
+3. Expand the **Advanced** section.
+4. Change the Backend URL to:
+
 ```
-
-3. Enable **Developer Mode**.
-4. Click **Load unpacked**.
-5. Select the `extension/` folder.
-
-The extension is now installed.
-
----
-
-## Step 6: Open WatchWise
-
-1. Open any YouTube video.
-2. Click the WatchWise extension icon.
-3. The WatchWise Side Panel will open.
-4. Open **Settings**.
-5. Expand **Advanced**.
-6. Set:
-
-```text
-Backend URL
 http://localhost:8000
 ```
 
-7. Save the settings.
+5. Save the settings.
 
-WatchWise will now communicate with your local FastAPI backend.
+The extension will now communicate with your locally hosted backend instead of the public WatchWise server.
 
 ---
-
 
 # Screenshots
 
-## Side Panel
+### Main Dashboard
+![Main Dashboard](screenshots/main_dashboard.png)
 
-<img width="1917" height="963" alt="image" src="https://github.com/user-attachments/assets/5062b0ee-8bf4-4eeb-8045-472d02011420" />
+### Top Claims
+![Top Claims](screenshots/top_claims.png)
 
----
+### MIL Skills
+![MIL Skills](screenshots/mil_skills.png)
 
-## Settings Page
-
-<img width="1917" height="970" alt="image" src="https://github.com/user-attachments/assets/feb3388a-a2bd-4dbb-beb9-2ad57b7011cd" />
-
----
-
-## Analysis Result
-
-<img width="1917" height="977" alt="image" src="https://github.com/user-attachments/assets/253271f0-c24b-4b2b-951c-c531ae8ed466" />
+### Before You Share
+![Before You Share](screenshots/before_you_share.png)
 
 ---
 
@@ -328,12 +346,12 @@ A short demonstration video of WatchWise is available here:
 
 WatchWise has been designed with security in mind.
 
-- API keys are never logged by WatchWise.
-- Gemini API keys are loaded from the local `.env` file or supplied directly by the user through the extension.
-- HTML content is sanitized before analysis.
+- API keys are never logged.
+- User-supplied Gemini API keys are never stored on the server.
+- HTML is sanitized before analysis.
 - Prompt injection attempts inside transcripts or comments are treated strictly as data.
-- Rate limiting helps protect the backend from abuse.
-- Cached analyses never contain API keys or sensitive user information.
+- Rate limiting protects the backend against abuse.
+- Cached analyses never contain user API keys or sensitive information.
 
 ---
 
@@ -348,20 +366,19 @@ To analyze a YouTube video, the backend processes:
 - Video URL
 - Video transcript (when available)
 - Public YouTube comments
-- Gemini API key (either from the local backend configuration or provided through the extension)
+- Optional user-supplied Gemini API key (only for the current request)
 
 ## Information Stored
 
 The backend stores:
 
 - Cached AI analysis results
-- No user accounts
+- No personal user accounts
 - No passwords
-- No personal profile information
-- No browsing history outside videos explicitly analyzed by the user
-- No Gemini API keys inside the cache database
+- No browsing history
+- No user Gemini API keys
 
-Gemini API keys are never logged, cached, or shared by WatchWise. When using the local backend configuration, keys remain stored only on the user's machine.
+User-provided Gemini API keys are used only for the current analysis request and are never logged, persisted, cached, or shared.
 
 ---
 
@@ -390,8 +407,6 @@ WatchWise is an AI-assisted recommendation tool and should not be treated as an 
 
 Current limitations include:
 
-- WatchWise relies on YouTube-provided metadata and transcripts; inaccurate video categorization by YouTube may occasionally affect analysis eligibility.
-- Educational-content detection is intentionally conservative and may allow some non-educational videos to be analyzed.
 - Supports **English transcripts only**.
 - Videos without accessible transcripts cannot currently be analyzed.
 - Long transcripts are **truncated** before AI analysis to improve performance and control API costs.
@@ -402,10 +417,12 @@ Current limitations include:
 
 # Future Improvements
 
+- Multi-language transcript and analysis support
+- Browser-wide analysis beyond YouTube
 - Chrome Web Store release
-- Multi-language transcript support
-- Improved educational-content classification beyond YouTube category metadata
 - Playlist and channel-level analysis
+- Improved claim extraction and evidence evaluation
+- Classroom and educator support features
 
 ---
 
@@ -415,19 +432,22 @@ This project is licensed under the MIT License.
 
 ---
 
-# Author
+# Authors
 
-**Malakonda Chaitanya Bhargav**
-
-Reliance Foundation Undergraduate Scholar
-
-B.Tech Computer Science and Engineering (AI & ML)
-
-SRM Institute of Science and Technology
+### Malakonda Chaitanya Bhargav
+- Backend Development
+- AI Integration
+- Product Design
 
 GitHub: https://github.com/BhargavMalakonda
+LinkedIn: <https://www.linkedin.com/in/chaitanya-bhargav-malakonda/>
 
-LinkedIn: https://www.linkedin.com/in/chaitanya-bhargav-malakonda/
+### Kata Lekhana
+- Research
+- Proposal Development
+- Testing & User Experience
+
+LinkedIn: <her-linkedin>
 
 ---
 
